@@ -58,6 +58,41 @@ void lihatProduk(){
     }
 }
 
+void buatTransaksi(){
+
+    string kodeProduk;
+    cout << "Masukkan kode transaksi: "; cin >> dataTransaksi[jumlahTransaksi].kodeTransaksi;
+    cout << "Nama pelanggan: "; cin.ignore();getline(cin, dataTransaksi[jumlahTransaksi].namaPelanggan);
+    cout << "Masukkan kode produk yang dibeli: "; cin >> kodeProduk;
+    bool produkDitemukan = false;
+    for (int i = 0; i < jumlahProduk; i++) {
+        if (dataProduk[i].kode == kodeProduk) {
+            produkDitemukan = true;
+            dataTransaksi[jumlahTransaksi].item[0].kodeProduk = dataProduk[i].kode;
+            cout << "Masukkan jumlah: "; cin >> dataTransaksi[jumlahTransaksi].item[0].jumlah;
+            dataTransaksi[jumlahTransaksi].item[0].subtotal = dataProduk[i].harga * dataTransaksi[jumlahTransaksi].item[0].jumlah;
+            dataTransaksi[jumlahTransaksi].totalHarga += dataTransaksi[jumlahTransaksi].item[0].subtotal;
+            cout << "Subtotal: Rp." << dataTransaksi[jumlahTransaksi].item[0].subtotal << endl;
+            produkDitemukan = true;
+            break;
+        }
+    }
+
+    
+    if (!produkDitemukan) {
+        cout << "Produk dengan kode " << kodeProduk << " tidak ditemukan.\n";
+        return;
+    }
+
+    // yang buat mengurangi stok belum okeeee
+
+}
+
+
+
+   
+
+
 
 
 
