@@ -1,5 +1,14 @@
 #include<iostream>
+#include <fstream>
+#include <sstream>
 using namespace std;
+
+const int MAX_PRODUK = 100;
+const int MAX_TRANSAKSI = 200;
+const int MAX_ITEM = 100;
+string produk_filename = "produk.csv";
+string transaksi_filename = "transaksi.csv";
+string akun_filename = "akun.txt";
 
 struct produk {
     string kode;
@@ -7,26 +16,92 @@ struct produk {
     float harga;
     int stok;
 };
-produk dataProduk[100];
 
 struct itemTransaksi {
     string kodeProduk;
     int jumlah;
     float subtotal;
 };
-itemTransaksi dataItem[100];
 
 struct transaksi {
     string kodeTransaksi;
     string namaPelanggan;
-    itemTransaksi item[100];
     int jumlahItem;
     float totalHarga;
+    itemTransaksi item[100];
 };
-transaksi dataTransaksi[100];
+
+itemTransaksi dataItem[MAX_ITEM];
+transaksi dataTransaksi[MAX_TRANSAKSI];
+produk dataProduk[MAX_PRODUK];
+
 
 int jumlahProduk = 0;
 int jumlahTransaksi = 0;
+
+void formatting(string& input_str){
+    for(char& s : input_str ){
+        if (s=='_') s=' ';
+        else if(s==' ') s='_';
+    }
+}
+
+
+void muatProdukDariFile(){
+    ifstream file(produk_filename);
+    file.seekg(0);
+
+    jumlahProduk = 0;
+    string line;
+    string kode,nama,harga_str,stok_str;
+    float harga;
+    int stok;
+
+    while(getline(file,line)){
+        stringstream ss(line);
+        getline(ss,kode,',');
+        getline(ss,nama,',');
+        getline(ss,harga_str,',');
+        getline(ss,stok_str,',');
+        
+        harga = stof(harga_str);
+        stok = stoi(stok_str);
+        formatting(kode);
+        formatting(nama);
+
+        dataProduk[jumlahProduk].kode = kode;
+        dataProduk[jumlahProduk].nama = nama;
+        dataProduk[jumlahProduk].harga = harga;
+        dataProduk[jumlahProduk].stok = stok;
+
+        jumlahProduk++;
+    }
+    file.close();
+}
+
+void cetakProdukKeFile(){
+    ofstream out(produk_filename);
+    if(!out.is_open()){
+        cout<<"file : "<<produk_filename<<" gagal dibuka!"<<endl;
+        return;
+    }
+
+    for(int i=0; i < jumlahProduk ; i++ ){
+        string* kode = &dataProduk[i].kode;
+        string* nama = &dataProduk[i].nama;
+        float* harga = &dataProduk[i].harga;
+        int* stok = &dataProduk[i].stok;
+
+        formatting(*kode);
+        formatting(*nama);
+
+        out << *kode << ","
+            << *nama << ","
+            << *harga << ","
+            << *stok <<endl;
+    }
+    out.close();
+}
 
 void tambahProduk(){
     cout << "Masukkan kode produk: ";
@@ -40,6 +115,8 @@ void tambahProduk(){
     cin >> dataProduk[jumlahProduk].stok;
     jumlahProduk++;
     cout << "Produk berhasil ditambahkan.\n";
+
+    cetakProdukKeFile();
 }
 
 void lihatProduk(){
@@ -59,46 +136,49 @@ void lihatProduk(){
 }
 
 void buatTransaksi(){
-
-    string kodeProduk;
-    cout << "Masukkan kode transaksi: "; cin >> dataTransaksi[jumlahTransaksi].kodeTransaksi;
-    cout << "Nama pelanggan: "; cin.ignore();getline(cin, dataTransaksi[jumlahTransaksi].namaPelanggan);
-    cout << "Masukkan kode produk yang dibeli: "; cin >> kodeProduk;
+    int jumlah,index;
+    string tKode,tNama,pKode;
+    char loop;
     bool produkDitemukan = false;
-    for (int i = 0; i < jumlahProduk; i++) {
-        if (dataProduk[i].kode == kodeProduk) {
-            produkDitemukan = true;
-            dataTransaksi[jumlahTransaksi].item[0].kodeProduk = dataProduk[i].kode;
-            cout << "Masukkan jumlah: "; cin >> dataTransaksi[jumlahTransaksi].item[0].jumlah;
-            dataTransaksi[jumlahTransaksi].item[0].subtotal = dataProduk[i].harga * dataTransaksi[jumlahTransaksi].item[0].jumlah;
-            dataTransaksi[jumlahTransaksi].totalHarga += dataTransaksi[jumlahTransaksi].item[0].subtotal;
-            cout << "Subtotal: Rp." << dataTransaksi[jumlahTransaksi].item[0].subtotal << endl;
-            produkDitemukan = true;
-            break;
-        }
-    }
-
     
-    if (!produkDitemukan) {
-        cout << "Produk dengan kode " << kodeProduk << " tidak ditemukan.\n";
-        return;
-    }
+    cout << "Masukkan kode transaksi: "; cin >> tKode;
+    cout << "Nama pelanggan: "; cin.ignore();getline(cin,tNama);
 
-    // yang buat mengurangi stok belum okeeee
+    dataTransaksi[jumlahTransaksi].kodeTransaksi = tKode;
+    dataTransaksi[jumlahTransaksi].namaPelanggan = tNama;
+    
+    produk* Pptr = nullptr ;
+    do{
+        cout << "Masukkan kode produk yang dibeli: "; cin >> pKode;
+        for (int i = 0; i < jumlahProduk; i++) {
+            if (dataProduk[i].kode == pKode) {
+                produkDitemukan = true;
+                Pptr = &dataProduk[i];
+                break;
+            }
+        }
+        
+        if (!produkDitemukan) {
+            cout << "Produk dengan kode " << pKode << " tidak ditemukan.\n";
+            return;
+        }
+    
+        cout<<"Jumlah : ";cin>>jumlah;
+        if (jumlah > Pptr->stok) {
+            cout << "Stok tidak cukup! Stok tersedia: " << Pptr->stok << "\n";
+        }
+        //belum selesai di sini
+        
+        
+        cout << "Tambah Produk Lain (y/n): "; cin >> loop;
+    }while(loop=='y');
 
 }
 
-
-
-   
-
-
-
-
-
 int main(){
-    do{
+    muatProdukDariFile();
     int pil;
+    do{
 
     cout<<"===============================================================";
     cout<<"|             MANAJEMEN TOKO 'BIYAN DAN MAS ARSYA             |"<<endl;
@@ -123,13 +203,13 @@ int main(){
             buatTransaksi();
             break;
         case 4:
-            lihatTransaksi();
+            // lihatTransaksi();
             break;
         case 5:
-            cariProduk();
+            // cariProduk();
             break;
         case 6:
-            hapusProduk();
+            // hapusProduk();
             break;
         case 0:
             cout << "Terima kasih telah menggunakan program ini.\n";
