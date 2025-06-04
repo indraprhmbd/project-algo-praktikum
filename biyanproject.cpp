@@ -13,21 +13,21 @@ string akun_filename = "akun.txt";
 struct produk {
     string kode;
     string nama;
-    float harga;
+    int harga;
     int stok;
 };
 
 struct itemTransaksi {
     string kodeProduk;
     int jumlah;
-    float subtotal;
+    int subtotal;
 };
 
 struct transaksi {
     string kodeTransaksi;
     string namaPelanggan;
     int jumlahItem;
-    float totalHarga;
+    long totalHarga;
     itemTransaksi item[100];
 };
 
@@ -39,11 +39,12 @@ produk dataProduk[MAX_PRODUK];
 int jumlahProduk = 0;
 int jumlahTransaksi = 0;
 
-void formatting(string& input_str){
+string formatting(string& input_str){
     for(char& s : input_str ){
         if (s=='_') s=' ';
         else if(s==' ') s='_';
     }
+    return input_str;
 }
 
 
@@ -54,8 +55,7 @@ void muatProdukDariFile(){
     jumlahProduk = 0;
     string line;
     string kode,nama,harga_str,stok_str;
-    float harga;
-    int stok;
+    int harga,stok;
 
     while(getline(file,line)){
         stringstream ss(line);
@@ -64,10 +64,10 @@ void muatProdukDariFile(){
         getline(ss,harga_str,',');
         getline(ss,stok_str,',');
         
-        harga = stof(harga_str);
+        harga = stoi(harga_str);
         stok = stoi(stok_str);
-        formatting(kode);
-        formatting(nama);
+        kode = formatting(kode);
+        nama = formatting(nama);
 
         dataProduk[jumlahProduk].kode = kode;
         dataProduk[jumlahProduk].nama = nama;
@@ -89,11 +89,11 @@ void cetakProdukKeFile(){
     for(int i=0; i < jumlahProduk ; i++ ){
         string* kode = &dataProduk[i].kode;
         string* nama = &dataProduk[i].nama;
-        float* harga = &dataProduk[i].harga;
+        int* harga = &dataProduk[i].harga;
         int* stok = &dataProduk[i].stok;
 
-        formatting(*kode);
-        formatting(*nama);
+        *kode = formatting(*kode);
+        *nama = formatting(*nama);
 
         out << *kode << ","
             << *nama << ","
@@ -135,17 +135,47 @@ void lihatProduk(){
     }
 }
 
+void cetakTransaksiKeFile(){
+    ofstream tOut(transaksi_filename, ios::app);
+    if(!tOut.is_open()){
+        cout << "FILE : " << transaksi_filename << " gagal dibuka!" <<endl;
+        return;
+    }
+
+    string kode = dataTransaksi[jumlahTransaksi].kodeTransaksi;
+    string nama = dataTransaksi[jumlahTransaksi].namaPelanggan;
+    long harga = dataTransaksi[jumlahTransaksi].totalHarga;
+    int jumlah = dataTransaksi[jumlahTransaksi].jumlahItem;
+
+    tOut << kode << "," <<nama<< "," << harga << "," << jumlah << ",";
+     
+    for(int i=0;i<=jumlah;i++){
+        string iKode = dataTransaksi[jumlahTransaksi].item[jumlah].kodeProduk;
+        int iJumlah = dataTransaksi[jumlahTransaksi].item[jumlah].jumlah;
+        int iSubtotal = dataTransaksi[jumlahTransaksi].item[jumlah].subtotal; 
+        
+        tOut << iKode << "," << iJumlah << "," << iSubtotal ;
+    }
+
+    tOut.close();
+}
+
 void buatTransaksi(){
-    int jumlah,index;
+    int jumlah,
+        jumlahItem = 0;
     string tKode,tNama,pKode;
     char loop;
     bool produkDitemukan = false;
+
+    lihatProduk();
+    cout<<endl;
     
     cout << "Masukkan kode transaksi: "; cin >> tKode;
-    cout << "Nama pelanggan: "; cin.ignore();getline(cin,tNama);
+    cout << "Nama pelanggan: "; cin.ignore(); getline(cin,tNama);
 
     dataTransaksi[jumlahTransaksi].kodeTransaksi = tKode;
-    dataTransaksi[jumlahTransaksi].namaPelanggan = tNama;
+    dataTransaksi[jumlahTransaksi].namaPelanggan = formatting(tNama);
+
     
     produk* Pptr = nullptr ;
     do{
@@ -163,24 +193,96 @@ void buatTransaksi(){
             return;
         }
     
-        cout<<"Jumlah : ";cin>>jumlah;
-        if (jumlah > Pptr->stok) {
-            cout << "Stok tidak cukup! Stok tersedia: " << Pptr->stok << "\n";
-        }
-        //belum selesai di sini
+        do{
+            cout<<"Jumlah : ";cin>>jumlah;
+            if (jumlah > Pptr->stok) {
+                cout << "Stok tidak cukup! Stok tersedia: " << Pptr->stok << "\n";
+            }else 
+                break;
+        }while(true);
         
+        dataTransaksi[jumlahTransaksi].item[jumlahItem].kodeProduk = pKode ;
+        dataTransaksi[jumlahTransaksi].item[jumlahItem].jumlah = jumlah ; 
+        dataTransaksi[jumlahTransaksi].item[jumlahItem].subtotal =  Pptr->harga * jumlah ;
         
         cout << "Tambah Produk Lain (y/n): "; cin >> loop;
-    }while(loop=='y');
+        jumlahItem++;
+    }while((loop=='y'));
 
+    //total harga
+    long totalHarga = 0;
+    for(int i=0;i<=jumlahItem;i++){
+        int* hargaPerItem = &dataTransaksi[jumlahTransaksi].item[i].subtotal;
+        totalHarga += *hargaPerItem;
+    }
+
+    dataTransaksi[jumlahTransaksi].totalHarga = totalHarga;
+    dataTransaksi[jumlahTransaksi].jumlahItem = jumlahItem ;
+
+    cetakTransaksiKeFile();
+}
+
+void muatTransaksiDariFile(){
+
+    ifstream tIn(transaksi_filename);
+    if(!tIn.is_open()){
+        cout << "FILE : " << transaksi_filename << " gagal dibuka!" << endl;
+        return;
+    }
+
+    int* a = &jumlahTransaksi;
+
+    string line,tKode,tNama,tHarga_str,tJumlah_str;
+    string iKode,iJumlah_str,iSubtotal_str;
+    long tHarga,iSubtotal;
+    int tJumlah,iJumlah;
+
+    tIn.seekg(0);
+    while(getline(tIn,line)){
+        stringstream ss(line);
+        
+        getline(ss,tKode,',');
+        getline(ss,tNama,',');
+        getline(ss,tHarga_str,',');
+        getline(ss,tJumlah_str,',');
+    
+        tHarga = stol(tHarga_str);
+        tJumlah = stoi(tJumlah_str);
+        
+        dataTransaksi[*a].kodeTransaksi = tKode ;
+        dataTransaksi[*a].namaPelanggan = tNama;
+        dataTransaksi[*a].totalHarga = tHarga;
+        dataTransaksi[*a].jumlahItem = tJumlah;
+        
+
+        for(int i=0;i<tJumlah;i++){
+            getline(ss,iKode,',');
+            getline(ss,iJumlah_str,',');
+            getline(ss,iSubtotal_str,',');
+
+            iJumlah = stoi(iJumlah_str);
+            iSubtotal = stoi(iSubtotal_str);
+
+            dataTransaksi[*a].item[i].kodeProduk = iKode;
+            dataTransaksi[*a].item[i].jumlah = iJumlah;
+            dataTransaksi[*a].item[i].subtotal = iSubtotal;
+        }
+        *a++;
+    }
+    tIn.close();
+}
+
+void lihatTransaksi(){
+    //tolong selesaiin
 }
 
 int main(){
     muatProdukDariFile();
+    muatTransaksiDariFile();
     int pil;
     do{
-
-    cout<<"===============================================================";
+        system("cls");
+    cout<<"==============================================================="<<endl;
     cout<<"|             MANAJEMEN TOKO 'BIYAN DAN MAS ARSYA             |"<<endl;
     cout<<"==============================================================="<<endl;
     cout<<"| 1. Tambah Produk                                            |"<<endl;
@@ -191,19 +293,27 @@ int main(){
     cout<<"| 6. Hapus Produk                                             |"<<endl;
     cout<<"| 0. Keluar                                                   |"<<endl;
     cout<<"==============================================================="<<endl;
-    cout<<"Pilih menu: "; cin>>pil;
+    cout<<"Pilih menu: "; cin >> pil;
     switch(pil){
         case 1:
             tambahProduk();
             break;
         case 2:
-           lihatProduk();
+            lihatProduk();
             break;
         case 3:
+            if(jumlahProduk==0){
+                cout << "Belum ada produk!" << endl;
+                break;
+            }
             buatTransaksi();
             break;
         case 4:
-            // lihatTransaksi();
+            if(jumlahTransaksi==0){
+                cout << "Belum ada transaksi!" << endl;
+                break;
+            }
+            lihatTransaksi();
             break;
         case 5:
             // cariProduk();
@@ -216,7 +326,9 @@ int main(){
             break;
         default:
             cout << "Pilihan tidak valid. Silakan coba lagi.\n";    
-    }
+            break;
+        }
+        system("pause");
 } while (pil != 0);
 
     return 0;
