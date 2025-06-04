@@ -273,8 +273,111 @@ void muatTransaksiDariFile(){
 }
 
 void lihatTransaksi(){
-    //tolong selesaiin
+    if (jumlahTransaksi == 0) {
+        cout << "Belum ada transaksi." << endl;
+        return;
+    }
+    
+    cout<<"\n==========Daftar Transaksi=========="<<endl;
+    for(int i = 0; i < jumlahTransaksi; i++){
+        cout<<"Transaksi ke-"<<i+1<<endl;
+        cout << "Kode Transaksi : " << dataTransaksi[i].kodeTransaksi << endl;
+        cout << "Nama Pelanggan : " << dataTransaksi[i].namaPelanggan << endl;
+        cout << "Total Harga    : Rp." << dataTransaksi[i].totalHarga << endl;
+        cout << "Jumlah Item   : " << dataTransaksi[i].jumlahItem << endl;
+
+        for(int j = 0; j < dataTransaksi[i].jumlahItem; j++){
+            cout<<"Item ke-"<<j+1<<endl;
+            cout<<"Kode Produk  : "<<dataTransaksi[i].item[j].kodeProduk<<endl;
+            cout<<"Jumlah       : "<<dataTransaksi[i].item[j].jumlah<<endl;
+            cout<<"Subtotal     : Rp."<<dataTransaksi[i].item[j].subtotal<<endl;
+            cout<<"-------------------------------------------"<<endl;
+        }
+        cout<<"==========================================="<<endl;
+    }
 }
+
+void cariProduk(){
+    int cari;
+
+    cout<<"============CARI PRODUK============"<<endl;
+    cout<<"Cari berdasarkan : "<<endl;
+    cout<<"1. Sequential Search"<<endl;
+    cout<<"2. Binary Search"<<endl;
+    cout<<"Pilih metode pencarian (1/2): "; cin>>cari;
+    if(cari == 1){
+        string kode;
+        cout<<"Masukkan kode produk yang dicari: "; cin>>kode;
+        bool found = false;
+
+        for(int i=0; i<jumlahProduk; i++){
+            if(dataProduk[i].kode == kode){
+                cout<<"Produk ditemukan!"<<endl;
+                cout<<"Kode  : "<<dataProduk[i].kode<<endl;
+                cout<<"Nama  : "<<dataProduk[i].nama<<endl;
+                cout<<"Harga : Rp."<<dataProduk[i].harga<<endl;
+                cout<<"Stok  : "<<dataProduk[i].stok<<endl;
+                found = true;
+                break;
+            }
+        }
+        if(!found) cout<<"Produk tidak ditemukan!"<<endl;
+    
+    }else if(cari == 2){
+        bool sorting = false;
+        for(int i=0; i<jumlahProduk-1; i++){
+            for(int j=i+1; j<jumlahProduk; j++){
+                if(dataProduk[i].kode > dataProduk[j].kode){
+                    swap(dataProduk[i], dataProduk[j]);
+                }
+            }
+        }
+        sorting = true;
+
+        string kode;
+        cout<<"Masukkan kode produk yang dicari: "; cin>>kode;
+        int left = 0, right = jumlahProduk - 1;
+        bool found = false;
+        while(left <= right){
+            int mid = left + (right - left) / 2;
+            if(dataProduk[mid].kode == kode){
+                cout<<"Produk ditemukan!"<<endl;
+                cout<<"Kode  : "<<dataProduk[mid].kode<<endl;
+                cout<<"Nama  : "<<dataProduk[mid].nama<<endl;
+                cout<<"Harga : Rp."<<dataProduk[mid].harga<<endl;
+                cout<<"Stok  : "<<dataProduk[mid].stok<<endl;
+                found = true;
+                break;
+            }else if(dataProduk[mid].kode < kode){
+                left = mid + 1;
+            }else{
+                right = mid - 1;
+            }
+        }
+        if(!found) cout<<"Produk tidak ditemukan!"<<endl;
+    }else{
+        cout<<"Pilihan tidak valid!"<<endl;
+    }
+}
+
+void hapusProduk(){
+    string kode;
+    cout<<"Masukkan kode produk yang ingin dihapus: "; cin>>kode;
+
+    for(int i=0; i<jumlahProduk; i++){
+        if(dataProduk[i].kode == kode){
+            for(int j=i; j<jumlahProduk-1; j++){
+                dataProduk[j] = dataProduk[j+1];
+            }
+            jumlahProduk--;
+            cout<<"Produk dengan kode "<<kode<<" berhasil dihapus."<<endl;
+            cetakProdukKeFile();
+            return;
+        }
+    }
+    cout<<"Produk dengan kode "<<kode<<" tidak ditemukan."<<endl;
+}
+
 
 int main(){
     muatProdukDariFile();
@@ -316,10 +419,10 @@ int main(){
             lihatTransaksi();
             break;
         case 5:
-            // cariProduk();
+            cariProduk();
             break;
         case 6:
-            // hapusProduk();
+            hapusProduk();
             break;
         case 0:
             cout << "Terima kasih telah menggunakan program ini.\n";
