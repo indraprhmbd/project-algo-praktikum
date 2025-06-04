@@ -14,8 +14,8 @@ Aplikasi **manajemen toko berbasis konsol** yang dibuat dengan C++ untuk membant
 5. **Selesai!**
 
 > 💡 **Tips Login Awal:**  
-> Username: `a`  
-> Password: `a`
+> Username: `admin`  
+> Password: `admin123`
 
 ---
 
