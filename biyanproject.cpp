@@ -33,7 +33,7 @@ struct transaksi {
 
 itemTransaksi dataItem[MAX_ITEM];
 transaksi dataTransaksi[MAX_TRANSAKSI];
-produk dataProduk[MAX_PRODUK];
+produk dataProduk[MAX_PRODUK]; 
 
 
 int jumlahProduk = 0;
@@ -150,9 +150,9 @@ void cetakTransaksiKeFile(){
     tOut << kode << "," <<nama<< "," << harga << "," << jumlah << ",";
      
     for(int i=0;i<=jumlah;i++){
-        string iKode = dataTransaksi[jumlahTransaksi].item[jumlah].kodeProduk;
-        int iJumlah = dataTransaksi[jumlahTransaksi].item[jumlah].jumlah;
-        int iSubtotal = dataTransaksi[jumlahTransaksi].item[jumlah].subtotal; 
+        string iKode = dataTransaksi[jumlahTransaksi].item[i].kodeProduk;
+        int iJumlah = dataTransaksi[jumlahTransaksi].item[i].jumlah;
+        int iSubtotal = dataTransaksi[jumlahTransaksi].item[i].subtotal; 
         
         tOut << iKode << "," << iJumlah << "," << iSubtotal ;
     }
@@ -211,7 +211,7 @@ void buatTransaksi(){
 
     //total harga
     long totalHarga = 0;
-    for(int i=0;i<=jumlahItem;i++){
+    for(int i=0;i<jumlahItem;i++){
         int* hargaPerItem = &dataTransaksi[jumlahTransaksi].item[i].subtotal;
         totalHarga += *hargaPerItem;
     }
@@ -220,6 +220,36 @@ void buatTransaksi(){
     dataTransaksi[jumlahTransaksi].jumlahItem = jumlahItem ;
 
     cetakTransaksiKeFile();
+
+    cout << "\n========== DETAIL TRANSAKSI ==========\n";
+    cout << "Kode Transaksi : " << dataTransaksi[jumlahTransaksi].kodeTransaksi << endl;
+    cout << "Nama Pelanggan : " << dataTransaksi[jumlahTransaksi].namaPelanggan << endl;
+    cout << "Total Harga    : Rp." << dataTransaksi[jumlahTransaksi].totalHarga << endl;
+    cout << "Jumlah Item    : " << dataTransaksi[jumlahTransaksi].jumlahItem << endl;
+
+    for(int i = 0; i < jumlahItem; i++){
+        cout << "Item ke-" << i+1 << endl;
+        cout << "Kode Produk : " << dataTransaksi[jumlahTransaksi].item[i].kodeProduk << endl;
+        cout << "Jumlah      : " << dataTransaksi[jumlahTransaksi].item[i].jumlah << endl;
+        cout << "Subtotal    : Rp." << dataTransaksi[jumlahTransaksi].item[i].subtotal << endl;
+        cout << "--------------------------------------" << endl;
+}
+
+    cout << "=====================================\n";
+    cout << "Transaksi berhasil dibuat.\n";
+
+    // Update stok produk
+    for (int i = 0; i < jumlahItem; i++) {
+        for (int j = 0; j < jumlahProduk; j++) {
+            if (dataTransaksi[jumlahTransaksi].item[i].kodeProduk == dataProduk[j].kode) {
+                dataProduk[j].stok -= dataTransaksi[jumlahTransaksi].item[i].jumlah;
+                break;
+            }
+        }
+    }
+
+    jumlahTransaksi++;
+    cetakProdukKeFile();   
 }
 
 void muatTransaksiDariFile(){
@@ -361,6 +391,13 @@ void cariProduk(){
 }
 
 void hapusProduk(){
+    if (jumlahProduk == 0) {
+        cout << "Tidak ada produk yang dapat dihapus." << endl;
+        return;
+    } 
+
+    lihatProduk(); 
+    cout<<"\n==========HAPUS PRODUK=========="<<endl;
     string kode;
     cout<<"Masukkan kode produk yang ingin dihapus: "; cin>>kode;
 
@@ -383,7 +420,33 @@ int main(){
     muatProdukDariFile();
     muatTransaksiDariFile();
     int pil;
-    do{
+
+  
+        string inputUsername, inputPassword;
+        string username = "akusukadia";
+        string password = "sukadia123";
+        
+        int sisa = 3;
+        for (int i = 0; i < 3; i++) {
+            system("cls");
+            cout << "=================== LOGIN ===================" << endl;
+            cout << "Username: "; cin >> inputUsername;
+            cout << "Password: "; cin >> inputPassword;
+
+            if (inputUsername == username && inputPassword == password) {
+                cout << "Login berhasil!" << endl;
+                break;
+            } else {
+                cout << "Username atau password salah. Silakan coba lagi.(Kesempatan mencoba = " <<sisa-i-1<< " lagi)" << endl;
+                if (i == 2) {
+                    cout << "Anda telah mencoba 3 kali. Program akan keluar." << endl;
+                    return 0;
+                }
+                system("pause");
+            }
+        }
+    
+     do{
         system("cls");
     cout<<"==============================================================="<<endl;
     cout<<"|             MANAJEMEN TOKO 'BIYAN DAN MAS ARSYA             |"<<endl;
