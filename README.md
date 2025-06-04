@@ -7,10 +7,10 @@ Aplikasi **manajemen toko berbasis konsol** yang dibuat dengan C++ untuk membant
 
 ### 🎮 Cara Menjalankan
 
-1. **Download file `.exe`**
+1. **Download file `manajemen-toko.exe`**
 2. **Download file `produk.csv`**
 3. **Pindahkan kedua file ke dalam satu folder** (disarankan agar tidak terjadi error file not found)
-4. **Jalankan file `.exe`**
+4. **Jalankan file `manajemen-toko.exe`**
 5. **Selesai!**
 
 > 💡 **Tips Login Awal:**  
@@ -39,15 +39,17 @@ Aplikasi **manajemen toko berbasis konsol** yang dibuat dengan C++ untuk membant
 ### 📁 File Terkait
 
 - `produk.csv` → Berisi daftar produk dan stok
+- `transaksi.csv` → Berisi data transaksi, rincian item, dan harga
 - `log_transaksi.txt` → Log riwayat transaksi beserta waktu
-- `biyanproject.exe` → File program yang bisa langsung dijalankan
+- `manajemen-toko.exe` → File program yang bisa langsung dijalankan
+- `manajemen-toko.cpp` → Source code C++
 
 ---
 
 ### ⚠️ Catatan
 
-- Pastikan file `produk.csv` berada di lokasi yang sama dengan `.exe` saat dijalankan.
-- Program hanya berjalan di lingkungan Windows (karena `.exe`).
+- Pastikan file `produk.csv` berada di lokasi yang sama dengan `manajemen-toko.exe` saat dijalankan.
+- Program hanya berjalan di lingkungan Windows (karena `manajemen-toko.exe`).
 - Program berjalan di **terminal/console**, tanpa GUI.
 
 ---
