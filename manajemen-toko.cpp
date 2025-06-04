@@ -510,8 +510,8 @@ int main(){
     muatTransaksiDariFile();
     int pil;
         string inputUsername, inputPassword;
-        string username = "a";
-        string password = "a";
+        string username = "admin";
+        string password = "admin123";
         
         int sisa = 3;
         for (int i = 0; i < 3; i++) {
