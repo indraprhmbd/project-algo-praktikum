@@ -254,7 +254,9 @@ void buatTransaksi(){
         if (produkDitemukan) {
             do{
                 cout<<"Jumlah : ";cin>>jumlah;
-                if (jumlah > Pptr->stok) {
+                if(jumlah<=0){
+                    cout<<"Invalid Input!" <<endl;
+                }else if (jumlah > Pptr->stok) {
                     cout << "Stok tidak cukup! Stok tersedia: " << Pptr->stok << "\n";
                 }else 
                     break;
