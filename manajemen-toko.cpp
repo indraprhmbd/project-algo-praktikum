@@ -454,43 +454,45 @@ void hapusProduk(){
     cout << "Masukkan (sebagian) kode produk yang ingin dihapus: ";
     cin >> inputKode;
 
-    // Tampilkan semua produk yang cocok
-    vector<int> kandidatIndex;
+    int* kandidat = new int[50];
+    int count=0;
     cout << "\nProduk yang cocok dengan input:\n";
     for (int i = 0; i < jumlahProduk; i++) {
         if (dataProduk[i].kode.find(inputKode) != string::npos) {
-            cout << i + 1 << ". " << dataProduk[i].kode << " - "
+            cout << count+1 << ". " << dataProduk[i].kode << " - "
                  << dataProduk[i].nama << " - Rp" << dataProduk[i].harga
                  << " - Stok: " << dataProduk[i].stok << endl;
-            kandidatIndex.push_back(i);
+            kandidat[count] = i;
+            count++;
         }
     }
 
-    if (kandidatIndex.empty()) {
+    if (count==0) {
         cout << "Tidak ada produk yang cocok dengan \"" << inputKode << "\"." << endl;
         return;
     }
 
     int pilihan;
-    cout << "Pilih nomor produk yang ingin dihapus [1 - " << kandidatIndex.size() << "]: ";
+    cout << "Pilih nomor produk yang ingin dihapus [1 - " << count << "]: ";
     cin >> pilihan;
 
-    if (pilihan < 1 || pilihan > kandidatIndex.size()) {
+    if (pilihan < 1 || pilihan > count) {
         cout << "Pilihan tidak valid." << endl;
         return;
     }
 
-    int hapusIndex = kandidatIndex[pilihan - 1];
+    int hapusIndex = kandidat[pilihan - 1];
     string kodeHapus = dataProduk[hapusIndex].kode;
-
+    
     // Geser data
     for (int j = hapusIndex; j < jumlahProduk - 1; j++) {
         dataProduk[j] = dataProduk[j + 1];
     }
     jumlahProduk--;
-
+    
     cetakProdukKeFile();
     cout << "Produk dengan kode \"" << kodeHapus << "\" berhasil dihapus." << endl;
+    delete[] kandidat;
 }
 
 
